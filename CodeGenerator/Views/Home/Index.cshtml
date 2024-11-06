@@ -1,0 +1,103 @@
+﻿@model CodeGenerator.Models.ViewGeneratorViewModel
+
+@{
+    ViewData["Title"] = "SQL View Generator";
+}
+
+<h2>SQL View Generator</h2>
+
+<!-- First Form for Generating Views -->
+<form id="generateViewsForm">
+    <div class="form-group">
+        <label for="ConnectionString">Connection String</label>
+        <input type="text" class="form-control" id="ConnectionString" name="ConnectionString"
+               asp-for="ConnectionString" placeholder="Enter SQL Server connection string" required />
+        <span asp-validation-for="ConnectionString" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Generate Views</button>
+    </div>
+</form>
+
+<div class="form-group" id="resultContainer" style="display:none;">
+    <label for="GeneratedSQL">Generated SQL Views</label>
+    <textarea class="form-control" id="GeneratedSQL" rows="10" readonly></textarea>
+</div>
+
+<!-- Second Form for Generating Stored Procedures -->
+<form id="generateProcsForm">
+    <div class="form-group">
+        <label for="ConnectionString2">Connection String</label>
+        <input type="text" class="form-control" id="ConnectionString2" name="ConnectionString2"
+               asp-for="ConnectionString" placeholder="Enter SQL Server connection string" required />
+        <span asp-validation-for="ConnectionString" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Generate Procs</button>
+    </div>
+</form>
+
+<div class="form-group" id="generateProcsContainer" style="display:none;">
+    <label for="GeneratedSQLProc">Generated SQL Procs</label>
+    <textarea class="form-control" id="GeneratedSQLProc" rows="10" readonly></textarea>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            // Form submission for generating views
+            $('#generateViewsForm').on('submit', function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    url: '@Url.Action("GenerateViews")', // Update with correct controller name
+                    type: 'POST',
+                    data: {
+                        ConnectionString: $('#ConnectionString').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#GeneratedSQL').val(response.generatedSQL);
+                        } else {
+                            $('#GeneratedSQL').val(response.message);
+                        }
+                        $('#resultContainer').show();
+                    },
+                    error: function () {
+                        $('#GeneratedSQL').val("An error occurred while processing your request.");
+                        $('#resultContainer').show();
+                    }
+                });
+            });
+
+            // Form submission for generating stored procedures
+            $('#generateProcsForm').on('submit', function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    url: '@Url.Action("GenerateProcs")', // Update with correct controller name
+                    type: 'POST',
+                    data: {
+                        ConnectionString: $('#ConnectionString2').val()
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#GeneratedSQLProc').val(response.generatedSQL);
+                        } else {
+                            $('#GeneratedSQLProc').val(response.message);
+                        }
+                        $('#generateProcsContainer').show();
+                    },
+                    error: function () {
+                        $('#GeneratedSQLProc').val("An error occurred while processing your request.");
+                        $('#generateProcsContainer').show();
+                    }
+                });
+            });
+        });
+    </script>
+}
